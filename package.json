@@ -16,5 +16,14 @@
     "url": "https://github.com/Davedave001/PharmaTrace/issues"
   },
   "homepage": "https://github.com/Davedave001/PharmaTrace#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@hashgraph/sdk": "^2.66.0",
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.4"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "hardhat": "^2.25.0"
+  }
 }
