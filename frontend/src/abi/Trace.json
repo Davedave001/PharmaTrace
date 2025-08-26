@@ -1,0 +1,133 @@
+{
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "batchID",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "qaResult",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "serialNo",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "BatchRecorded",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "batches",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "batchID",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "qaResult",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "serialNo",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "batchID",
+          "type": "string"
+        }
+      ],
+      "name": "getBatch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "batchID",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "qaResult",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "serialNo",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Trace.Batch",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "batchID",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "qaResult",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "serialNo",
+          "type": "string"
+        }
+      ],
+      "name": "recordBatch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}
