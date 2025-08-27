@@ -3,6 +3,13 @@ import { StatusBadge } from "@/components/ui/status-badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { useToast } from "@/hooks/use-toast"
+import { getTraceContract } from "@/services/traceContract"
+import { getSignerIfAvailable } from "@/lib/web3"
 import { 
   Factory, 
   FlaskConical, 
@@ -11,10 +18,25 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle2,
-  Users
+  Users,
+  Plus,
+  Wallet
 } from "lucide-react"
+import { useState, useEffect } from "react"
 
 export default function Dashboard() {
+  const { toast } = useToast()
+  const [isNewBatchOpen, setIsNewBatchOpen] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [walletConnected, setWalletConnected] = useState(false)
+  const [walletAddress, setWalletAddress] = useState("")
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [batchForm, setBatchForm] = useState({
+    batchId: '',
+    qaResult: '',
+    serialNumber: ''
+  })
+
   const activeBatches = [
     { id: "B-2024-001", product: "Amoxicillin 500mg", status: "In Production", progress: 65, operator: "John Doe" },
     { id: "B-2024-002", product: "Ibuprofen 200mg", status: "QC Testing", progress: 85, operator: "Jane Smith" },
@@ -26,6 +48,120 @@ export default function Dashboard() {
     { time: "09:15 AM", activity: "QC Test completed for API purity", result: "98.7% (Pass)", status: "passed" },
     { time: "08:45 AM", activity: "CAPA initiated for temperature deviation", priority: "High", status: "pending" },
   ]
+
+  // Check wallet connection on component mount
+  useEffect(() => {
+    checkWalletConnection()
+  }, [])
+
+  const checkWalletConnection = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+        if (accounts.length > 0) {
+          setWalletConnected(true)
+          setWalletAddress(accounts[0])
+        }
+      } catch (error) {
+        console.log("Error checking wallet connection:", error)
+      }
+    }
+  }
+
+  const handleConnectWallet = async () => {
+    if (!window.ethereum) {
+      toast({
+        title: "MetaMask Not Found",
+        description: "Please install MetaMask and connect to Hedera testnet.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsConnecting(true)
+    try {
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      })
+      
+      if (accounts.length > 0) {
+        setWalletConnected(true)
+        setWalletAddress(accounts[0])
+        toast({
+          title: "Wallet Connected!",
+          description: `Connected to address: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+        })
+      }
+    } catch (error) {
+      console.error("Error connecting wallet:", error)
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect wallet.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsConnecting(false)
+    }
+  }
+
+  const handleNewBatch = async () => {
+    if (!walletConnected) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Please connect your MetaMask wallet to record batches on the blockchain.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!batchForm.batchId || !batchForm.qaResult || !batchForm.serialNumber) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all fields: Batch ID, QA Result, and Serial Number.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsRecording(true)
+    try {
+      const contract = await getTraceContract(false)
+      const tx = await contract.recordBatch(
+        batchForm.batchId,
+        batchForm.qaResult,
+        batchForm.serialNumber
+      )
+      
+      toast({
+        title: "Recording Batch...",
+        description: "Transaction submitted to Hedera blockchain.",
+      })
+
+      await tx.wait()
+      
+      toast({
+        title: "Batch Recorded Successfully!",
+        description: `Batch ${batchForm.batchId} has been recorded on Hedera blockchain.`,
+      })
+
+      // Reset form and close modal
+      setBatchForm({ batchId: '', qaResult: '', serialNumber: '' })
+      setIsNewBatchOpen(false)
+      
+      // Refresh the page to show new batch
+      window.location.reload()
+      
+    } catch (error) {
+      console.error("Error recording batch:", error)
+      toast({
+        title: "Error Recording Batch",
+        description: error.message || "Failed to record batch on blockchain.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRecording(false)
+    }
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -40,12 +176,89 @@ export default function Dashboard() {
             <TrendingUp className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
-          <Button className="bg-gradient-primary">
-            <Factory className="mr-2 h-4 w-4" />
-            New Batch
-          </Button>
+          
+          {!walletConnected ? (
+            <Button onClick={handleConnectWallet} disabled={isConnecting} className="bg-gradient-primary">
+              <Wallet className="mr-2 h-4 w-4" />
+              {isConnecting ? "Connecting..." : "Connect Wallet"}
+            </Button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Badge variant="outline" className="text-xs">
+                {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+              </Badge>
+              <Dialog open={isNewBatchOpen} onOpenChange={setIsNewBatchOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-gradient-primary">
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Batch
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Record New Batch on Hedera</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="batchId">Batch ID *</Label>
+                      <Input
+                        id="batchId"
+                        placeholder="e.g., B-2024-004"
+                        value={batchForm.batchId}
+                        onChange={(e) => setBatchForm(prev => ({ ...prev, batchId: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="qaResult">QA Result *</Label>
+                      <Textarea
+                        id="qaResult"
+                        placeholder="e.g., Pass - All quality parameters within specification"
+                        value={batchForm.qaResult}
+                        onChange={(e) => setBatchForm(prev => ({ ...prev, qaResult: e.target.value }))}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="serialNumber">Serial Number *</Label>
+                      <Input
+                        id="serialNumber"
+                        placeholder="e.g., SN-2024-001234"
+                        value={batchForm.serialNumber}
+                        onChange={(e) => setBatchForm(prev => ({ ...prev, serialNumber: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setIsNewBatchOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleNewBatch} 
+                      disabled={isRecording}
+                      className="bg-gradient-primary"
+                    >
+                      {isRecording ? "Recording..." : "Record on Blockchain"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Wallet Connection Warning */}
+      {!walletConnected && (
+        <Card className="border-warning bg-warning/10">
+          <CardContent className="p-4">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <span className="text-sm text-warning">
+                Connect your MetaMask wallet to Hedera testnet to record batches on the blockchain.
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Metrics Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
