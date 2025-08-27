@@ -321,10 +321,10 @@ export default function Batches() {
               </Badge>
               <Dialog open={isNewBatchOpen} onOpenChange={setIsNewBatchOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-primary">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Batch
-                  </Button>
+          <Button className="bg-gradient-primary">
+            <Plus className="mr-2 h-4 w-4" />
+            New Batch
+          </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px]">
                   <DialogHeader>
