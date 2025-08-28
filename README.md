@@ -10,7 +10,7 @@
 
 ## 🌟 Live Demo
 
-**Production URL**: [https://frontend-4e2hbt1gc-daves-projects-39d159e9.vercel.app](https://frontend-4e2hbt1gc-daves-projects-39d159e9.vercel.app)
+**Production URL**: [https://frontend-h5scf13jj-daves-projects-39d159e9.vercel.app](https://frontend-h5scf13jj-daves-projects-39d159e9.vercel.app)
 
 ## 📋 Table of Contents
 
@@ -267,7 +267,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Live Demo**: [https://frontend-4e2hbt1gc-daves-projects-39d159e9.vercel.app](https://frontend-4e2hbt1gc-daves-projects-39d159e9.vercel.app)
+- **Live Demo**: [https://frontend-h5scf13jj-daves-projects-39d159e9.vercel.app](https://frontend-h5scf13jj-daves-projects-39d159e9.vercel.app)
 - **GitHub Repository**: [https://github.com/Davedave001/PharmaTrace](https://github.com/Davedave001/PharmaTrace)
 - **Hedera Documentation**: [https://docs.hedera.com/](https://docs.hedera.com/)
 - **HashScan Explorer**: [https://hashscan.io/testnet](https://hashscan.io/testnet)
